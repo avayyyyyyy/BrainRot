@@ -1,101 +1,166 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import GenerateForm from "@/components/GenerateForm";
+import PhonePreview from "@/components/PhonePreview";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const [generatedScript, setGeneratedScript] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const handleScriptGenerated = (script: string) => {
+    setGeneratedScript(script);
+  };
+
+  const handleGenerateVideo = () => {
+    setShowPreview(true);
+  };
+
+  return (
+    <main className="min-h-screen bg-[#0A0A0A] relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-[#0A0A0A]">
+        <div className="absolute top-0 -left-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-0 -right-40 w-96 h-96 bg-[#B8860B]/10 rounded-full blur-3xl animate-pulse" />
+        {/* Fun floating emojis */}
+        <div className="absolute top-20 left-20 animate-float-slow">🤪</div>
+        <div className="absolute top-40 right-20 animate-float-slower">🎭</div>
+        <div className="absolute bottom-40 left-40 animate-float">🌟</div>
+        <div className="absolute top-60 right-40 animate-float-slow">✨</div>
+        <div className="absolute bottom-20 right-60 animate-float-slower">
+          🎬
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+      </div>
+
+      {/* Navbar */}
+      <nav className="fixed w-full top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-lg border-b border-[#B8860B]/10">
+        <div className="container mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="relative group">
+              <span className="text-2xl group-hover:animate-spin">🧠</span>
+              <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-[#B8860B] rounded-full animate-ping" />
+            </div>
+            <span className="font-bold text-[#E5E5E5] text-xl tracking-wide group-hover:text-[#DAA520] transition-colors">
+              BrainRot
+            </span>
+          </div>
+          <div className="flex items-center gap-6">
+            <a
+              href="https://github.com/sponsors/avayyyyyyy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-[#DAA520] to-[#B8860B] text-black rounded-lg font-medium hover:from-[#B8860B] hover:to-[#DAA520] transition-all transform hover:scale-105 group"
+            >
+              <span className="text-lg group-hover:animate-spin">💝</span>
+              <span>Support</span>
+            </a>
+            <div className="flex items-center gap-2 text-[#888888] text-sm">
+              <span className="animate-bounce">🎭</span>
+              <span className="hidden md:inline group-hover:text-[#DAA520] transition-colors">
+                Destroying braincells since 2024
+                <span className="inline-block ml-2 animate-spin">🌀</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="relative pt-28 pb-20">
+        <div className="container mx-auto px-4 md:px-6">
+          {/* Hero Section */}
+          <div className="text-center mb-16 max-w-3xl mx-auto relative">
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-40 bg-[#B8860B]/20 rounded-full blur-3xl animate-pulse" />
+            <div className="relative">
+              <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex gap-4 animate-bounce-slow">
+                <span className="text-3xl">🎬</span>
+                <span className="text-3xl">✨</span>
+                <span className="text-3xl">🎭</span>
+              </div>
+              <h1 className="relative inline-block bg-gradient-to-r from-[#DAA520] via-[#B8860B] to-[#CD853F] text-transparent bg-clip-text font-black text-4xl md:text-6xl mb-6 leading-tight hover:scale-105 transition-transform">
+                Turn Your Brain Into Memes
+                <div className="absolute -right-16 top-0 flex flex-col gap-2 animate-float">
+                  <span className="text-3xl">🤪</span>
+                  <span className="text-3xl animate-spin">💫</span>
+                </div>
+              </h1>
+              <p className="relative text-[#E5E5E5] text-lg md:text-xl leading-relaxed">
+                Let the brainrot take over! Generate absolutely unhinged
+                vertical videos that will make your followers question your
+                sanity.
+                <span className="inline-block ml-2 animate-bounce">🤯</span>
+              </p>
+              <div className="mt-4 flex justify-center gap-4">
+                <span className="text-2xl animate-float-slow">🎵</span>
+                <span className="text-2xl animate-float">🎪</span>
+                <span className="text-2xl animate-float-slower">✨</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Content Grid */}
+          <div
+            className={`grid grid-cols-1 ${
+              showPreview ? "lg:grid-cols-12" : "lg:grid-cols-8"
+            } gap-8 max-w-7xl mx-auto`}
+          >
+            {/* Left Side - Script Generator */}
+            <div
+              className={`${
+                showPreview
+                  ? "lg:col-span-7"
+                  : "lg:col-span-full lg:max-w-3xl lg:mx-auto"
+              } w-full relative group`}
+            >
+              <div className="absolute -inset-1 bg-gradient-to-r from-[#DAA520] via-[#B8860B] to-[#CD853F] rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200 animate-gradient-xy"></div>
+              <div className="bg-[#111111]/50 backdrop-blur-sm rounded-2xl p-6 border border-[#B8860B]/10 shadow-xl relative overflow-hidden group hover:border-[#B8860B]/20 transition-colors">
+                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-[#B8860B]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                <GenerateForm
+                  onScriptGenerated={handleScriptGenerated}
+                  onGenerateVideo={handleGenerateVideo}
+                />
+              </div>
+            </div>
+
+            {/* Right Side - Phone Preview */}
+            {showPreview && (
+              <div className="lg:col-span-5 w-full flex flex-col items-start justify-center lg:sticky lg:top-32 transition-all duration-500">
+                <h2 className="text-[#DAA520] font-bold text-xl mb-6 ml-10 flex items-center gap-3">
+                  Preview Your TikTok
+                  <span className="inline-block animate-bounce">✨</span>
+                  <span className="inline-block animate-spin">🎬</span>
+                  <span className="inline-block animate-pulse">🎭</span>
+                </h2>
+                <div className="relative">
+                  <div className="absolute -inset-4 bg-gradient-to-r from-[#B8860B]/20 to-[#DAA520]/20 rounded-[44px] blur-xl animate-pulse" />
+                  <PhonePreview script={generatedScript} />
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer className="relative bg-[#0A0A0A]/50 backdrop-blur-sm text-[#888888] py-6 text-center border-t border-[#B8860B]/10">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="animate-spin">🎭</span>
+              <p className="text-sm">Powered by StageHand</p>
+            </div>
+            <div className="flex items-center gap-6">
+              <span className="text-sm flex items-center gap-2">
+                Made with <span className="animate-pulse">🧠</span> (or lack
+                thereof)
+              </span>
+              <span className="text-sm">
+                © 2024 BrainRot <span className="animate-bounce">✨</span>
+              </span>
+            </div>
+          </div>
+        </div>
       </footer>
-    </div>
+    </main>
   );
 }
