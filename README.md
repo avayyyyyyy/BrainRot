@@ -138,4 +138,3 @@ Project Link: [https://github.com/avayyyyyyy/brainrot](https://github.com/avayyy
 ---
 
 Made with 🧠 (or lack thereof) by [Shubhankit Jain](https://github.com/avayyyyyyy)
-# BrainRot

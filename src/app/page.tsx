@@ -44,7 +44,16 @@ export default function Home() {
               BrainRot
             </span>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <a
+              href="https://github.com/avayyyyyyy/brainrot"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-[#1a1a1a] text-[#E5E5E5] rounded-lg font-medium hover:bg-[#222222] transition-all transform hover:scale-105 border border-[#333333] group"
+            >
+              <span className="text-lg group-hover:animate-spin">⭐</span>
+              <span>GitHub</span>
+            </a>
             <a
               href="https://github.com/sponsors/avayyyyyyy"
               target="_blank"
