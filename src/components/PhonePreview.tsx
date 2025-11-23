@@ -74,35 +74,9 @@ export default function PhonePreview({ script, generateVideoTrigger }: PhonePrev
     if (!audioRef.current || !isPlaying || scriptLines.length === 0) return;
 
     const updateCaption = () => {
-      const currentTime = audioRef.current?.currentTime || 0;
-      const totalDuration = audioRef.current?.duration || 0;
+      const currentLine = scriptLines[currentLineIndex] || "";
 
-      if (totalDuration) {
-        const progress = (currentTime / totalDuration) * 0.7;
-        const lineIndex = Math.floor(progress * scriptLines.length);
-
-        if (lineIndex !== currentLineIndex && lineIndex < scriptLines.length) {
-          setTimeout(() => {
-            setCurrentLineIndex(lineIndex);
-            const words = scriptLines[lineIndex].split(" ");
-            const shortCaption = words.slice(0, 8).join(" ");
-            setCurrentCaption(shortCaption);
-          }, 300);
-        } else {
-          const line = scriptLines[lineIndex];
-          const words = line.split(" ");
-          const wordProgress = ((progress * scriptLines.length) % 1) * 0.7;
-          const wordIndex = Math.floor(wordProgress * words.length);
-
-          const startWord = Math.max(0, wordIndex);
-          const endWord = Math.min(words.length, startWord + 8);
-          const visibleWords = words.slice(startWord, endWord).join(" ");
-
-          if (visibleWords !== currentCaption) {
-            setCurrentCaption(visibleWords);
-          }
-        }
-      }
+      setCurrentCaption(currentLine);
     };
 
     const interval = setInterval(updateCaption, 200);
@@ -124,7 +98,7 @@ export default function PhonePreview({ script, generateVideoTrigger }: PhonePrev
         return null;
       });
 
-      const response = await fetch("/api/tts", {
+      const response = await fetch("http://localhost:3001/api/tts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,7 +113,7 @@ export default function PhonePreview({ script, generateVideoTrigger }: PhonePrev
       const audioBlob = await response.blob();
       const url = URL.createObjectURL(audioBlob);
       setAudioUrl(url);
-      setCurrentCaption("Audio ready! Click play to start");
+      setCurrentCaption("Ready to play");
 
       if (audioRef.current) {
         audioRef.current.src = url;
@@ -180,7 +154,6 @@ export default function PhonePreview({ script, generateVideoTrigger }: PhonePrev
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
-      setCurrentCaption("Audio paused");
       return;
     }
 
@@ -193,16 +166,13 @@ export default function PhonePreview({ script, generateVideoTrigger }: PhonePrev
 
       await audioRef.current.play();
       setIsPlaying(true);
-      setCurrentCaption(scriptLines[0] || "Playing...");
     } catch (error) {
       console.error("Audio playback failed:", error);
-      setCurrentCaption("Tap to play audio (mobile requires user interaction)");
     }
   };
 
   const handleAudioEnd = () => {
     setIsPlaying(false);
-    setCurrentCaption("Audio finished! Click play to restart");
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
     }
@@ -242,116 +212,99 @@ export default function PhonePreview({ script, generateVideoTrigger }: PhonePrev
   };
 
   return (
-    <div className="relative w-[280px] h-[540px] border bg-black transition-all duration-500 rounded-3xl overflow-hidden shadow-2xl">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-7 bg-black rounded-b-xl z-20" />
+    <div className="w-full h-full flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="relative w-full max-w-xs aspect-[9/16] sm:max-w-sm md:max-w-md bg-black rounded-xl overflow-hidden shadow-2xl border-2 border-stone-600">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-b-2xl z-20" />
 
-      <div className="w-full h-full bg-[#080808] relative flex flex-col">
-        <div className="absolute inset-0 bg-black">
-          <video
-            ref={videoRef}
-            className="w-full h-full object-cover"
-            muted
-            loop
-            playsInline
-            onError={(e) => console.error("Video error:", e)}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80" />
-        </div>
+        <div className="w-full h-full bg-neutral-950 relative flex flex-col">
+          <div className="absolute inset-0 bg-black">
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              muted
+              loop
+              playsInline
+              onError={(e) => console.error("Video error:", e)}
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+          </div>
 
-        <div className="absolute top-0 left-0 right-0 h-8 flex items-center justify-between px-6 text-white/60 text-xs z-10">
-          <span>9:41</span>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-3 border border-white/60 rounded-sm">
-              <div className="w-3 h-2 bg-white/60 rounded-sm m-px" />
+          <div className="absolute top-0 left-0 right-0 pt-2 px-4 sm:px-6 flex items-center bg-black pb-2  justify-between text-white/70 text-xs z-10 h-8">
+            <span className={`font-semibold`}>
+              {new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true,
+              })}
+            </span>
+            <div className="flex items-center border border-white/10 rounded-full h-2 w-6">
+              <div className="bg-white/25 rounded-full h-2 w-6">
+                <div className="bg-green-500 h-2 rounded-full" style={{ width: '80%' }} />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center relative z-0">
-          <div className="absolute inset-0 opacity-20 flex items-center justify-center overflow-hidden">
-            <div className="w-64 h-64 bg-zinc-800 rounded-full blur-[80px]" />
-          </div>
-
-          <div className="relative z-10 space-y-6">
+          <div className="flex-1 flex flex-col items-center justify-center px-6 text-center relative z-10">
             {isGenerating ? (
-              <div className="space-y-3 opacity-60">
-                <div className="w-12 h-12 border-2 border-zinc-700 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <div className="w-6 h-6 border-2 border-zinc-600 border-t-zinc-400 rounded-full animate-spin" />
-                </div>
-                <p className="text-xs text-zinc-400">Generating audio...</p>
+              <div className="space-y-2">
+                <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin mx-auto" />
+                <p className="text-xs text-white/50 font-medium">Generating...</p>
               </div>
             ) : currentCaption ? (
-              <div className="space-y-4">
-                <div className="w-2 h-2 bg-red-500 rounded-full mx-auto animate-pulse" />
-                <p className="text-lg font-bold text-white leading-tight max-w-xs">
+              <div className="space-y-3">
+                <div className="w-1.5 h-1.5 bg-red-500 rounded-full mx-auto animate-pulse" />
+                <p className="text-base sm:text-lg font-semibold text-white leading-snug max-w-xs">
                   {currentCaption}
                 </p>
               </div>
             ) : script ? (
               needsAudio ? (
-                <div className="space-y-3 opacity-40">
-                  <div className="w-12 h-12 border-2 border-zinc-700 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <Volume2 size={20} className="text-zinc-700" />
-                  </div>
-                  <p className="text-xs text-zinc-500">Ready to generate audio</p>
+                <div className="space-y-2 opacity-50">
+                  <Volume2 size={24} className="text-white/40 mx-auto" />
+                  <p className="text-xs text-white/40 font-medium">Ready to generate</p>
                 </div>
               ) : (
-                <div className="space-y-3 opacity-40">
-                  <div className="w-12 h-12 border-2 border-zinc-700 rounded-full mx-auto mb-4 flex items-center justify-center">
-                    <Play size={20} fill="currentColor" className="text-zinc-700 ml-1" />
-                  </div>
-                  <p className="text-xs text-zinc-500">Press play to start</p>
+                <div className="space-y-2 opacity-50">
+                  <Play size={24} className="text-white/40 mx-auto fill-white/40" />
+                  <p className="text-xs text-white/40 font-medium">Press play</p>
                 </div>
               )
             ) : (
-              <div className="space-y-3 opacity-30">
-                <div className="w-12 h-12 border-2 border-zinc-700 rounded-full mx-auto mb-4 flex items-center justify-center">
-                  <Play size={20} fill="currentColor" className="text-zinc-700 ml-1" />
-                </div>
-                <p className="text-xs text-zinc-500">Waiting for script...</p>
+              <div className="space-y-2 opacity-30">
+                <Play size={24} className="text-white/30 mx-auto fill-white/30" />
+                <p className="text-xs text-white/30 font-medium">Waiting...</p>
               </div>
             )}
           </div>
-        </div>
 
-        {script && (
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3 z-50">
-            <button
-              onClick={handlePlayback}
-              disabled={isGenerating}
-              className="bg-white hover:bg-zinc-200 text-black w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
-            >
-              {isGenerating ? (
-                <div className="w-5 h-5 border border-black/30 border-t-black rounded-full animate-spin" />
-              ) : needsAudio ? (
-                <Volume2 size={18} />
-              ) : isPlaying ? (
-                <Pause size={18} />
-              ) : (
-                <Play size={16} fill="currentColor" className="ml-0.5" />
-              )}
-            </button>
-
-            {audioUrl && !needsAudio && (
+          {script && (
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-50">
               <button
-                onClick={handleRestart}
-                className="bg-black/40 hover:bg-black/60 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 border border-white/10 hover:border-white/20"
+                onClick={handlePlayback}
+                disabled={isGenerating}
+                className="bg-white hover:bg-gray-100 text-black w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
               >
-                <RotateCcw size={16} />
+                {isGenerating ? (
+                  <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                ) : needsAudio ? (
+                  <Volume2 size={20} />
+                ) : isPlaying ? (
+                  <Pause size={20} />
+                ) : (
+                  <Play size={18} fill="currentColor" className="ml-0.5" />
+                )}
               </button>
-            )}
-          </div>
-        )}
 
-        <div className="absolute bottom-0 w-full h-20 bg-gradient-to-t from-black/90 to-transparent z-10 flex items-end pb-4 px-6 justify-between text-white/60 text-[10px]">
-          <div className="space-y-1">
-            <div className="font-bold uppercase tracking-wider opacity-70">BrainRot</div>
-            <div className="opacity-50">Audio Preview</div>
-          </div>
-          <div className="flex gap-2">
-            <div className="w-4 h-4 rounded-full bg-white/20" />
-            <div className="w-4 h-4 rounded-full bg-white/20" />
-          </div>
+              {audioUrl && !needsAudio && (
+                <button
+                  onClick={handleRestart}
+                  className="bg-white/10 hover:bg-white/20 text-white w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 border border-white/20 hover:border-white/40"
+                >
+                  <RotateCcw size={16} />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -362,7 +315,6 @@ export default function PhonePreview({ script, generateVideoTrigger }: PhonePrev
           setIsPlaying(false);
           setIsGenerating(false);
           setNeedsAudio(true);
-          setCurrentCaption("Audio loading failed");
         }}
         playsInline
         preload="metadata"

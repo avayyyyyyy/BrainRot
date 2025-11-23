@@ -100,7 +100,7 @@ export default function GenerateForm({
       setCompletion("");
       setCopyStatus("idle");
 
-      const response = await fetch("/api/generate", {
+      const response = await fetch("http://localhost:3001/api/generate", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
