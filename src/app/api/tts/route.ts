@@ -1,9 +1,4 @@
-import OpenAI from "openai";
-
-// Create an OpenAI API client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || "",
-});
+import { openai } from "@/lib/openai";
 
 export const runtime = "edge";
 
@@ -15,11 +10,10 @@ export async function POST(req: Request) {
       return new Response("Text is required", { status: 400 });
     }
 
-    // Clean the text by removing headers and special characters
     const cleanText = text
-      .replace(/^#.*$/gm, "") // Remove headers
-      .replace(/[^\w\s,.?!'"()-]/g, "") // Keep only basic punctuation
-      .replace(/\n+/g, " ") // Replace newlines with spaces
+      .replace(/^#.*$/gm, "")
+      .replace(/[^a-zA-Z\s]/g, "")
+      .replace(/\n+/g, " ")
       .trim();
 
     const response = await openai.audio.speech.create({
@@ -28,10 +22,8 @@ export async function POST(req: Request) {
       input: cleanText,
     });
 
-    // Get the audio data as an ArrayBuffer
     const audioData = await response.arrayBuffer();
 
-    // Return the audio data with appropriate headers
     return new Response(audioData, {
       headers: {
         "Content-Type": "audio/mpeg",

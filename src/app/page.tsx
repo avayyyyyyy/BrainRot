@@ -1,175 +1,109 @@
 "use client";
 
-import { useState } from "react";
-import GenerateForm from "@/components/GenerateForm";
-import PhonePreview from "@/components/PhonePreview";
+import React, { useState } from 'react';
+import { Github, Twitter, Linkedin } from 'lucide-react';
+import GenerateForm from '@/components/GenerateForm';
+import PhonePreview from '@/components/PhonePreview';
+import { SOCIAL_LINKS, SYSTEM_STATUS } from '@/cst/constants';
 
-export default function Home() {
-  const [generatedScript, setGeneratedScript] = useState<string | null>(null);
-  const [showPreview, setShowPreview] = useState(false);
+const ICON_MAP = {
+  github: Github,
+  twitter: Twitter,
+  linkedin: Linkedin,
+} as const;
 
-  const handleScriptGenerated = (script: string) => {
-    setGeneratedScript(script);
-  };
+export default function BrainRotMinimal() {
+  const [script, setScript] = useState<string | null>(null);
+  const [generateVideoTrigger, setGenerateVideoTrigger] = useState(0);
+  const systemStatus = SYSTEM_STATUS;
+  const isSystemOnline = systemStatus === "ONLINE";
+  const socialLinks = SOCIAL_LINKS.map((link) => ({
+    ...link,
+    icon: ICON_MAP[link.icon] ?? Github,
+  }));
 
   const handleGenerateVideo = () => {
-    setShowPreview(true);
+    if (script) {
+      setGenerateVideoTrigger(prev => prev + 1);
+    }
   };
 
   return (
-    <main className="min-h-screen bg-[#0A0A0A] relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-[#0A0A0A]">
-        <div className="absolute top-0 -left-40 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 -right-40 w-96 h-96 bg-[#B8860B]/10 rounded-full blur-3xl animate-pulse" />
-        {/* Fun floating emojis */}
-        <div className="absolute top-20 left-20 animate-float-slow">🤪</div>
-        <div className="absolute top-40 right-20 animate-float-slower">🎭</div>
-        <div className="absolute bottom-40 left-40 animate-float">🌟</div>
-        <div className="absolute top-60 right-40 animate-float-slow">✨</div>
-        <div className="absolute bottom-20 right-60 animate-float-slower">
-          🎬
-        </div>
-      </div>
-
-      {/* Navbar */}
-      <nav className="fixed w-full top-0 z-50 bg-[#0A0A0A]/90 backdrop-blur-lg border-b border-[#B8860B]/10">
-        <div className="container mx-auto px-4 md:px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="relative group">
-              <span className="text-2xl group-hover:animate-spin">🧠</span>
-              <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-[#B8860B] rounded-full animate-ping" />
+    <div className="min-h-screen bg-[#050505] text-zinc-300 font-sans selection:bg-white/20 selection:text-white flex flex-col relative overflow-hidden">
+      <div className="fixed inset-0 bg-[linear-gradient(to_bottom_right,#000000,#0A0A0A,#111111)] pointer-events-none z-0" />
+      <div className="relative z-10 flex flex-col flex-1">
+        <nav className="sticky top-0 z-50 border-b border-white/5 bg-[#050505]/80 backdrop-blur-md">
+          <div className="container mx-auto px-6 h-16 flex items-center justify-between max-w-7xl">
+            <div className="flex items-center gap-3 group cursor-default">
+              <div className="w-5 h-5 border border-zinc-700 bg-zinc-900 group-hover:bg-zinc-100 group-hover:border-white transition-colors duration-500" />
+              <span className="text-lg font-bold tracking-tight text-white">BrainRot</span>
             </div>
-            <span className="font-bold text-[#E5E5E5] text-xl tracking-wide group-hover:text-[#DAA520] transition-colors">
-              BrainRot
-            </span>
+            <div className="text-xs text-zinc-600 uppercase tracking-[0.3em]">v2.0.1</div>
           </div>
-          <div className="flex items-center gap-4">
-            <a
-              href="https://github.com/avayyyyyyy/brainrot"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-[#1a1a1a] text-[#E5E5E5] rounded-lg font-medium hover:bg-[#222222] transition-all transform hover:scale-105 border border-[#333333] group"
-            >
-              <span className="text-lg group-hover:animate-spin">⭐</span>
-              <span>GitHub</span>
-            </a>
-            <a
-              href="https://github.com/sponsors/avayyyyyyy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden md:flex items-center gap-2 px-4 py-1.5 bg-gradient-to-r from-[#DAA520] to-[#B8860B] text-black rounded-lg font-medium hover:from-[#B8860B] hover:to-[#DAA520] transition-all transform hover:scale-105 group"
-            >
-              <span className="text-lg group-hover:animate-spin">💝</span>
-              <span>Support</span>
-            </a>
-            <div className="flex items-center gap-2 text-[#888888] text-sm">
-              <span className="animate-bounce">🎭</span>
-              <span className="hidden md:inline group-hover:text-[#DAA520] transition-colors">
-                Destroying braincells since 2024
-                <span className="inline-block ml-2 animate-spin">🌀</span>
-              </span>
-            </div>
+        </nav>
+        <main className="container mx-auto px-6 py-12 max-w-7xl flex-1 flex flex-col">
+          <div className="mb-12 pt-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">
+              Video Generation
+            </h1>
+            <p className="text-zinc-500 max-w-2xl text-lg leading-relaxed">
+              Configure your script and visual parameters. Watch the preview update in real-time.
+            </p>
           </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <div className="relative pt-28 pb-20">
-        <div className="container mx-auto px-4 md:px-6">
-          {/* Hero Section */}
-          <div className="text-center mb-16 max-w-3xl mx-auto relative">
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-40 bg-[#B8860B]/20 rounded-full blur-3xl animate-pulse" />
-            <div className="relative">
-              <div className="absolute -top-8 left-1/2 -translate-x-1/2 flex gap-4 animate-bounce-slow">
-                <span className="text-3xl">🎬</span>
-                <span className="text-3xl">✨</span>
-                <span className="text-3xl">🎭</span>
-              </div>
-              <h1 className="relative inline-block bg-gradient-to-r from-[#DAA520] via-[#B8860B] to-[#CD853F] text-transparent bg-clip-text font-black text-4xl md:text-6xl mb-6 leading-tight hover:scale-105 transition-transform">
-                Turn Your Brain Into Memes
-                <div className="absolute -right-16 top-0 flex flex-col gap-2 animate-float">
-                  <span className="text-3xl">🤪</span>
-                  <span className="text-3xl animate-spin">💫</span>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 flex-1 pb-12 items-stretch">
+            <div className="lg:col-span-7 h-full">
+              <div className="h-full p-8 border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/40 hover:shadow-[0_0_30px_-15px_rgba(255,255,255,0.1)] transition-all duration-500 rounded-sm group backdrop-blur-sm flex flex-col">
+                <div className="flex items-center gap-2 mb-8 text-zinc-500 group-hover:text-zinc-300 transition-colors duration-500">
+                  <div className="w-4 h-4 border border-zinc-700 bg-zinc-900 group-hover:bg-zinc-100 group-hover:border-white transition-colors duration-500 rounded-sm" />
+                  <span className="text-xs uppercase tracking-widest font-semibold">Script Generation</span>
                 </div>
-              </h1>
-              <p className="relative text-[#E5E5E5] text-lg md:text-xl leading-relaxed">
-                Let the brainrot take over! Generate absolutely unhinged
-                vertical videos that will make your followers question your
-                sanity.
-                <span className="inline-block ml-2 animate-bounce">🤯</span>
-              </p>
-              <div className="mt-4 flex justify-center gap-4">
-                <span className="text-2xl animate-float-slow">🎵</span>
-                <span className="text-2xl animate-float">🎪</span>
-                <span className="text-2xl animate-float-slower">✨</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Content Grid */}
-          <div
-            className={`grid grid-cols-1 ${
-              showPreview ? "lg:grid-cols-12" : "lg:grid-cols-8"
-            } gap-8 max-w-7xl mx-auto`}
-          >
-            {/* Left Side - Script Generator */}
-            <div
-              className={`${
-                showPreview
-                  ? "lg:col-span-7"
-                  : "lg:col-span-full lg:max-w-3xl lg:mx-auto"
-              } w-full relative group`}
-            >
-              <div className="absolute -inset-1 bg-gradient-to-r from-[#DAA520] via-[#B8860B] to-[#CD853F] rounded-2xl blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200 animate-gradient-xy"></div>
-              <div className="bg-[#111111]/50 backdrop-blur-sm rounded-2xl p-6 border border-[#B8860B]/10 shadow-xl relative overflow-hidden group hover:border-[#B8860B]/20 transition-colors">
-                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-[#B8860B]/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <GenerateForm
-                  onScriptGenerated={handleScriptGenerated}
-                  onGenerateVideo={handleGenerateVideo}
-                />
-              </div>
-            </div>
-
-            {/* Right Side - Phone Preview */}
-            {showPreview && (
-              <div className="lg:col-span-5 w-full flex flex-col items-start justify-center lg:sticky lg:top-32 transition-all duration-500">
-                <h2 className="text-[#DAA520] font-bold text-xl mb-6 ml-10 flex items-center gap-3">
-                  Preview Your TikTok
-                  <span className="inline-block animate-bounce">✨</span>
-                  <span className="inline-block animate-spin">🎬</span>
-                  <span className="inline-block animate-pulse">🎭</span>
-                </h2>
-                <div className="relative">
-                  <div className="absolute -inset-4 bg-gradient-to-r from-[#B8860B]/20 to-[#DAA520]/20 rounded-[44px] blur-xl animate-pulse" />
-                  <PhonePreview script={generatedScript} />
+                <div className="flex-1">
+                  <GenerateForm
+                    onScriptGenerated={setScript}
+                    onGenerateVideo={handleGenerateVideo}
+                  />
                 </div>
               </div>
-            )}
+            </div>
+            <div className="lg:col-span-5 h-full">
+              <div
+                className="sticky top-24 min-h-full w-full border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] hover:border-white/40 hover:shadow-[0_0_30px_-15px_rgba(255,255,255,0.1)] transition-all duration-500 rounded-sm backdrop-blur-sm flex flex-col items-center justify-center p-8 group"
+              >
+                <div className="absolute top-6 left-6 flex items-center gap-2 text-zinc-500 group-hover:text-zinc-300 transition-colors duration-500">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                  <span className="text-xs uppercase tracking-widest font-semibold">Live Preview</span>
+                </div>
+                <PhonePreview script={script} generateVideoTrigger={generateVideoTrigger} />
+              </div>
+            </div>
           </div>
-        </div>
+        </main>
+        <footer className="border-t border-white/5 py-8 bg-[#050505]">
+          <div className="container mx-auto px-6 flex flex-col items-center gap-4 text-xs text-zinc-600 font-mono">
+            <div>
+              SYSTEM STATUS:
+              <span className={`ml-1 font-semibold ${isSystemOnline ? "text-emerald-400" : "text-red-400"}`}>
+                {systemStatus}
+              </span>
+              &nbsp; | &nbsp; BRAINROT v2.0.1
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-4 text-[11px]">
+              {socialLinks.map(({ label, href, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors duration-300"
+                >
+                  <Icon size={14} />
+                  <span>{label}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </footer>
       </div>
-
-      {/* Footer */}
-      <footer className="relative bg-[#0A0A0A]/50 backdrop-blur-sm text-[#888888] py-6 text-center border-t border-[#B8860B]/10">
-        <div className="container mx-auto px-4 md:px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <span className="animate-spin">🎭</span>
-              <p className="text-sm">Powered by StageHand</p>
-            </div>
-            <div className="flex items-center gap-6">
-              <span className="text-sm flex items-center gap-2">
-                Made with <span className="animate-pulse">🧠</span> (or lack
-                thereof)
-              </span>
-              <span className="text-sm">
-                © 2024 BrainRot <span className="animate-bounce">✨</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </main>
+    </div>
   );
 }

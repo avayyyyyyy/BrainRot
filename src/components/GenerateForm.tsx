@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { FormEvent, useState, useRef, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { Sparkles, Copy, Play } from "lucide-react";
+import { getInputError } from "@/cst/helpers";
 
-// Random brainrot prompts
 const BRAINROT_PROMPTS = [
   "pov: explaining to my FBI agent why I googled 'how to adopt a raccoon' at 3am",
   "me trying to convince my mom that buying 17 different types of pasta is a good financial decision",
@@ -24,7 +25,7 @@ const BRAINROT_PROMPTS = [
   "justifying why watching conspiracy theory videos about pigeons is educational",
 ];
 
-interface GenerateFormProps {
+type GenerateFormProps = {
   onScriptGenerated: (script: string) => void;
   onGenerateVideo: () => void;
 }
@@ -38,13 +39,15 @@ export default function GenerateForm({
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [copyStatus, setCopyStatus] = useState<"idle" | "copied">("idle");
+  const [errors, setErrors] = useState<{ input?: string }>({});
   const scriptContainerRef = useRef<HTMLDivElement>(null);
+  const hasCompletion = completion.trim().length > 0;
 
-  // Auto-scroll effect
+
+
   useEffect(() => {
     if (scriptContainerRef.current && completion) {
       const container = scriptContainerRef.current;
-      // Use requestAnimationFrame to ensure DOM has updated
       requestAnimationFrame(() => {
         container.scrollTo({
           top: container.scrollHeight,
@@ -54,10 +57,24 @@ export default function GenerateForm({
     }
   }, [completion]);
 
+  const validateForm = () => {
+    const inputError = getInputError(input);
+    setErrors(inputError ? { input: inputError } : {});
+    return !inputError;
+  };
+
+  const handleInputChange = (value: string) => {
+    setInput(value);
+    const inputError = getInputError(value);
+    setErrors(inputError ? { input: inputError } : {});
+  };
+
   const handleMagicFill = () => {
     const randomPrompt =
       BRAINROT_PROMPTS[Math.floor(Math.random() * BRAINROT_PROMPTS.length)];
     setInput(randomPrompt);
+    const inputError = getInputError(randomPrompt);
+    setErrors(inputError ? { input: inputError } : {});
   };
 
   const handleCopyScript = async () => {
@@ -72,7 +89,10 @@ export default function GenerateForm({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
+
+    if (!validateForm()) {
+      return;
+    }
 
     try {
       setIsLoading(true);
@@ -124,101 +144,111 @@ export default function GenerateForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="relative">
-      <div className="bg-[#111111] rounded-2xl p-6 border border-[#B8860B]/20 shadow-2xl">
-        <div className="flex items-center justify-between gap-3 mb-6">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">🤯</span>
-            <h2 className="text-[#E5E5E5] text-lg font-medium">
-              Release your intrusive thoughts...
-            </h2>
-          </div>
-          <Button
-            type="button"
-            onClick={handleMagicFill}
-            className="bg-[#111111] hover:bg-[#1a1a1a] text-[#DAA520] h-10 px-4 rounded-lg border border-[#B8860B]/20 flex items-center gap-2 hover:scale-105 transition-all duration-200 hover:border-[#DAA520]/50"
-            disabled={isLoading}
-            title="Magic Fill"
-          >
-            <span className="text-base font-medium">Magic</span>
-            <span className="text-xl animate-pulse">✨</span>
-          </Button>
-        </div>
-        <div className="relative mb-4">
-          <input
-            type="text"
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="group/input">
+        <label className="flex items-center gap-2 text-xs font-medium text-zinc-500 mb-3 group-hover/input:text-zinc-300 transition-colors duration-300">
+          <Sparkles size={14} /> SCRIPT PROMPT
+        </label>
+        <div className="relative">
+          <textarea
             value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="pov: me explaining why watching 6 hours of cat videos is 'research'"
-            className="w-full p-4 rounded-xl bg-[#0A0A0A] border border-[#B8860B]/20 text-[#E5E5E5] placeholder:text-[#888888] focus:outline-none focus:ring-2 focus:ring-[#DAA520]/30"
+            onChange={(e) => handleInputChange(e.target.value)}
+            placeholder="Describe your video concept or paste your script here..."
+            rows={4}
+            className={`w-full bg-black/20 border px-4 py-4 text-sm text-white placeholder:text-zinc-700 focus:outline-none hover:border-white/30 transition-all duration-300 rounded-sm resize-none pr-32 ${errors.input
+              ? "border-red-500/50 focus:border-red-500/70 hover:border-red-500/30"
+              : "border-white/10 focus:border-white/50 hover:border-white/30"
+              }`}
           />
-          <Button
-            type="submit"
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#111111] hover:bg-[#1a1a1a] text-[#DAA520] font-medium px-4 py-1.5 h-auto text-sm rounded-lg border border-[#B8860B]/20 hover:scale-105 transition-all duration-200 hover:border-[#DAA520]/50"
-            disabled={isLoading || !input.trim()}
-          >
-            {isLoading ? "Cooking... 👨‍🍳" : "Let it cook 🔥"}
-          </Button>
-        </div>
-        <div className="flex justify-between items-center text-sm text-[#888888]">
-          <div className="flex items-center gap-2">
-            <div className="h-1.5 w-24 bg-[#0A0A0A] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-[#DAA520] to-[#B8860B] rounded-full transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-            <span>Brain damage: {progress}%</span>
+          <div className="absolute right-2 bottom-2 pb-2 flex gap-2">
+            <Button
+              type="button"
+              onClick={handleMagicFill}
+              className="bg-black/20 hover:bg-black/30 text-zinc-300 border border-white/10 px-3 py-2 text-xs rounded-sm hover:border-white/30 transition-all duration-300 flex items-center gap-2"
+              disabled={isLoading}
+            >
+              <Sparkles size={12} />
+              <span>Magic</span>
+            </Button>
+            <Button
+              type="submit"
+              className="bg-white hover:bg-zinc-200 text-black font-medium px-3 py-2 text-xs rounded-sm transition-all duration-300 flex items-center gap-2"
+              disabled={isLoading || !input.trim() || Object.keys(errors).length > 0}
+            >
+              {isLoading ? (
+                <>
+                  <div className="w-3 h-3 border border-black/30 border-t-black rounded-full animate-spin" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <Play size={12} fill="currentColor" />
+                  <span>Generate</span>
+                </>
+              )}
+            </Button>
           </div>
-          <span>
-            {progress === 100 ? "Brain successfully rotted" : "More rot needed"}
-          </span>
         </div>
+        <div className="mt-3 flex items-center text-xs text-zinc-600">
+          <span>Character count: {input.trim().length}/2000</span>
+        </div>
+      </div>
 
-        {/* Generated Script Display */}
-        {completion && (
-          <div className="mt-6">
-            <div className="flex items-center justify-between mb-2 relative z-20">
-              <h3 className="text-[#DAA520] font-medium">
-                Your Brainrot Script:
-              </h3>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  onClick={handleCopyScript}
-                  className="bg-[#111111] hover:bg-[#1a1a1a] text-[#DAA520] font-medium px-3 py-1.5 h-auto text-sm rounded-lg border border-[#B8860B]/20 flex items-center gap-2"
-                  disabled={isLoading}
-                >
-                  <span>
-                    {copyStatus === "copied" ? "Copied! ✨" : "Copy 📋"}
-                  </span>
-                </Button>
-                <Button
-                  type="button"
-                  onClick={onGenerateVideo}
-                  className="bg-gradient-to-r from-[#DAA520] to-[#B8860B] hover:from-[#B8860B] hover:to-[#DAA520] text-black font-medium px-3 py-1.5 h-auto text-sm rounded-lg flex items-center gap-2 transition-all transform hover:scale-105"
-                  disabled={isLoading}
-                >
-                  <span>Generate Video 🎬</span>
-                </Button>
-              </div>
-            </div>
-            <div className="relative z-10">
-              <div
-                ref={scriptContainerRef}
-                className="bg-[#0A0A0A] rounded-xl border border-[#B8860B]/20 h-[400px] overflow-y-auto relative"
-              >
-                <div className="p-6">
-                  <div className="prose prose-invert prose-gold max-w-none">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {completion}
-                    </ReactMarkdown>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {isLoading && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs text-zinc-500">
+            <span>Generating script...</span>
+            <span>{progress}%</span>
           </div>
-        )}
+          <div className="h-1 bg-black/20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-white rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className={`space-y-4 ${hasCompletion ? "" : "opacity-40"}`}>
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Generated Script</h3>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              onClick={handleCopyScript}
+              className="bg-black/20 hover:bg-black/30 text-zinc-300 border border-white/10 px-3 py-2 text-xs rounded-sm hover:border-white/30 transition-all duration-300 flex items-center gap-2"
+              disabled={isLoading || !hasCompletion}
+            >
+              <Copy size={12} />
+              <span>{copyStatus === "copied" ? "Copied" : "Copy"}</span>
+            </Button>
+            <Button
+              type="button"
+              onClick={onGenerateVideo}
+              className="bg-white hover:bg-zinc-200 text-black font-medium px-3 py-2 text-xs rounded-sm transition-all duration-300 flex items-center gap-2"
+              disabled={isLoading || !hasCompletion}
+            >
+              <Play size={12} fill="currentColor" />
+              <span>Generate Video</span>
+            </Button>
+          </div>
+        </div>
+        <div
+          ref={scriptContainerRef}
+          className="bg-black/20 border border-white/10 rounded-sm p-6 h-[400px] overflow-y-auto text-zinc-300 text-sm leading-relaxed"
+        >
+          {hasCompletion ? (
+            <div className="prose prose-invert prose-zinc max-w-none">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {completion}
+              </ReactMarkdown>
+            </div>
+          ) : (
+            <div className="h-full flex items-center justify-center text-xs uppercase tracking-wide text-zinc-600">
+              Waiting for generation...
+            </div>
+          )}
+        </div>
       </div>
     </form>
   );
